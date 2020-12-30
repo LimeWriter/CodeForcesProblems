@@ -81,35 +81,29 @@ import (
 	"sort"
 )
 
-func get_array_sums(arr []int, l int) map[int]bool {
+func get_array_sums(arr []int, l int) map[int64]bool {
 
-	prefix_sums := make([]int, l+1)
-	sum_map := make(map[int]bool)
+	sort.Ints(arr)
 
-	if sort.IntsAreSorted(arr) != true {
-		sort.Ints(arr)
-	}
+	sum_map := make(map[int64]bool)
 
+	prefix_sums := make([]int64, l+1)
 	for i := 0; i < l; i++ {
-		prefix_sums[i+1] += prefix_sums[i] + arr[i]
+		prefix_sums[i+1] += prefix_sums[i] + int64(arr[i])
 	}
 
 	var compute_sums func(int, int)
 	compute_sums = func(start, end int) {
 
-		/* Possible return cases:
-		 * 1. There is only one element in the array
-		 * 2. All array elements are the same
-		 * 3. Recursion returns the same array and the map needs to be checked if the sum was already added
-		 */
-		if start >= end || (sum_map[prefix_sums[end]-prefix_sums[start]] == true) {
+		sum_map[prefix_sums[end]-prefix_sums[start]] = true
+
+		// All elements in subarray are equal or the array can no longer be spliced
+		if arr[start] == arr[end-1] {
 			return
 		}
 
 		mid := (arr[start] + arr[end-1]) / 2
 		mid_index := sort.Search(len(arr), func(i int) bool { return arr[i] > mid })
-
-		sum_map[prefix_sums[end]-prefix_sums[start]] = true
 
 		compute_sums(start, mid_index)
 		compute_sums(mid_index, end)
@@ -142,7 +136,7 @@ func main() {
 		for j := 0; j < q; j++ {
 			fmt.Fscan(rd, &s)
 
-			if _, ok := sum_map[s]; ok {
+			if _, ok := sum_map[int64(s)]; ok {
 				fmt.Println("Yes")
 			} else {
 				fmt.Println("No")
